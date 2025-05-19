@@ -3,22 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Booking from './pages/Booking';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 
 // Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
-};
-
-// Home page placeholder
-const Home: React.FC = () => {
-  return (
-    <div style={{ padding: '20px' }}>
-      <h1>Welcome to the Booking System</h1>
-      <p>You are successfully logged in!</p>
-    </div>
-  );
 };
 
 // Create theme
@@ -41,7 +32,7 @@ const AppContent: React.FC = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={
           <ProtectedRoute>
-            <Home />
+            <Booking />
           </ProtectedRoute>
         } />
         <Route path="*" element={<Navigate to="/" />} />
