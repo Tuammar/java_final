@@ -16,6 +16,7 @@ import {
   SelectChangeEvent,
   Slider
 } from '@mui/material';
+import { format, addHours } from 'date-fns'; // Для работы с датами
 
 interface Place {
   id: string;
@@ -33,16 +34,27 @@ const allPlaces: Place[] = [
 ];
 
 const Booking: React.FC = () => {
-  const [startDate, setStartDate] = useState<string>('');
-  const [startTime, setStartTime] = useState<string>('');
-  const [endDate, setEndDate] = useState<string>('');
-  const [endTime, setEndTime] = useState<string>('');
+  const getInitialDateTime = () => {
+    const now = new Date();
+    const endDateDefault = addHours(now, 2);
+    return {
+      date: format(now, 'yyyy-MM-dd'),
+      time: format(now, 'HH:mm'),
+      endDate: format(endDateDefault, 'yyyy-MM-dd'),
+      endTime: format(endDateDefault, 'HH:mm'),
+    };
+  };
+
+  const [startDate, setStartDate] = useState<string>(getInitialDateTime().date);
+  const [startTime, setStartTime] = useState<string>(getInitialDateTime().time);
+  const [endDate, setEndDate] = useState<string>(getInitialDateTime().endDate);
+  const [endTime, setEndTime] = useState<string>(getInitialDateTime().endTime);
 
   const [selectedCategory, setSelectedCategory] = useState<'' | 'coworking' | 'library'>('');
   const [filteredPlaces, setFilteredPlaces] = useState<Place[]>([]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string>('');
 
-  const [timeSliderValue, setTimeSliderValue] = useState<number>(12); // Default to 12:00
+  const [timeSliderValue, setTimeSliderValue] = useState<number>(new Date().getHours()); // Default to current hour
   const [freeSlotsAtSelectedTime, setFreeSlotsAtSelectedTime] = useState<number>(0);
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -112,11 +124,12 @@ const Booking: React.FC = () => {
       
       setSelectedCategory('');
       setSelectedPlaceId('');
-      setStartDate('');
-      setStartTime('');
-      setEndDate('');
-      setEndTime('');
-      setTimeSliderValue(12);
+      const initialTimes = getInitialDateTime();
+      setStartDate(initialTimes.date);
+      setStartTime(initialTimes.time);
+      setEndDate(initialTimes.endDate);
+      setEndTime(initialTimes.endTime);
+      setTimeSliderValue(new Date().getHours());
 
     } catch (error) {
       console.error('Ошибка при создании бронирования:', error);
