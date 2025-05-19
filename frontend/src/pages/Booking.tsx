@@ -149,11 +149,32 @@ const Booking: React.FC = () => {
       const startDateTime = format(setSeconds(setMinutes(setHours(baseDate, startHour), 0), 0), "yyyy-MM-dd'T'HH:mm:ss");
       const endDateTime = format(setSeconds(setMinutes(setHours(baseDate, endHour), 0), 0), "yyyy-MM-dd'T'HH:mm:ss");
       
-      console.log('Бронирование:', {
-        seatPlaceId: selectedSeatPlaceId,
-        startTime: startDateTime,
-        endTime: endDateTime
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        showSnackbar('Для бронирования необходимо авторизоваться', 'error');
+        return;
+      }
+      
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          seatPlaceId: selectedSeatPlaceId,
+          startTime: startDateTime,
+          endTime: endDateTime
+        })
       });
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Бронирование успешно:', data);
       
       showSnackbar('Бронирование успешно создано!', 'success');
       
