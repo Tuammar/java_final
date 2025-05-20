@@ -34,11 +34,14 @@ interface SpaceData { // Renamed from Place, represents a space like a coworking
 // Updated data structure with nested seats
 const allSpacesWithSeats: SpaceData[] = [
   { 
-    id: 'cw1', name: 'Коворкинг "Прогресс" на 4-ом', category: 'coworking', totalSlots: 10,
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    name: 'Коворкинг "Прогресс" на 4-ом',
+    category: 'coworking',
+    totalSlots: 10,
     seats: [
-      { id: 'cw1-s1', seatNumber: 'Стол 1' },
-      { id: 'cw1-s2', seatNumber: 'Стол 2' },
-      { id: 'cw1-s3', seatNumber: 'Кабинка A' },
+      { id: '123e4567-e89b-12d3-a456-426614174001', seatNumber: 'Стол 1' },
+      { id: '123e4567-e89b-12d3-a456-426614174002', seatNumber: 'Стол 2' },
+      { id: '123e4567-e89b-12d3-a456-426614174003', seatNumber: 'Кабинка A' },
     ]
   },
   { 
@@ -143,8 +146,7 @@ const Booking: React.FC = () => {
 
     try {
       setIsLoading(true);
-      // Construct startDateTime and endDateTime from startDate and bookingTimeRange
-      const baseDate = new Date(startDate); // Parse the startDate string
+      const baseDate = new Date(startDate);
       
       const startDateTime = format(setSeconds(setMinutes(setHours(baseDate, startHour), 0), 0), "yyyy-MM-dd'T'HH:mm:ss");
       const endDateTime = format(setSeconds(setMinutes(setHours(baseDate, endHour), 0), 0), "yyyy-MM-dd'T'HH:mm:ss");
@@ -156,21 +158,23 @@ const Booking: React.FC = () => {
         return;
       }
       
-      const response = await fetch('/api/bookings', {
+      const response = await fetch('http://localhost:8081/api/bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          seatPlaceId: selectedSeatPlaceId,
+          spaceId: selectedSpaceId,
+          seatplaceId: selectedSeatPlaceId,
           startTime: startDateTime,
           endTime: endDateTime
         })
       });
       
       if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status}`);
+        const errorData = await response.text();
+        throw new Error(errorData || `Ошибка HTTP: ${response.status}`);
       }
       
       const data = await response.json();
@@ -178,6 +182,7 @@ const Booking: React.FC = () => {
       
       showSnackbar('Бронирование успешно создано!', 'success');
       
+      // Сброс формы
       setSelectedSpaceId('');
       setAvailableSeats([]);
       setSelectedSeatPlaceId('');
@@ -186,7 +191,7 @@ const Booking: React.FC = () => {
 
     } catch (error) {
       console.error('Ошибка при создании бронирования:', error);
-      showSnackbar('Не удалось создать бронирование', 'error');
+      showSnackbar(error instanceof Error ? error.message : 'Не удалось создать бронирование', 'error');
     } finally {
       setIsLoading(false);
     }
